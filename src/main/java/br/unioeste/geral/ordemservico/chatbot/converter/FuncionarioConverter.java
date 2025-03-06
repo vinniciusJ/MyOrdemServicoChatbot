@@ -19,22 +19,15 @@ public class FuncionarioConverter {
 
     public String converterFuncionarioParaString(Funcionario funcionario){
         String mensagem = """
-        ID: %d
-        Primeiro nome: %s
-        Nome do meio: %s
-        Sobrenome: %s
-        CPF: %s
-        Endereco: %s
-        Email(s): %s
-        Telefone(s): %s
+        O funcionário solicitado é o(a) %s, portador(a) do CPF %s. O endereço cadastrado para ele(a) é %s.
+        
+        E-mail(s) para contato: %s
+        Telefone(s) para contato: %s
         """;
 
         return String.format(
                 mensagem,
-                funcionario.getId(),
-                funcionario.getPrimeiroNome(),
-                funcionario.getNomeDoMeio(),
-                funcionario.getUltimoNome(),
+                funcionario.getNome(),
                 funcionario.getCpf(),
                 enderecoEspecificoConverter.converterEnderecoEspecificoParaString(funcionario.getEndereco()),
                 emailConverter.converterEmailsParaString(funcionario.getEmails()),
@@ -43,6 +36,36 @@ public class FuncionarioConverter {
     }
 
     public String converterFuncionariosParaString(List<Funcionario> funcionarios){
-        return funcionarios.stream().map(this::converterFuncionarioParaString).collect(Collectors.joining("\n"));
+        String funcionarioMensagem = """
+            ID: %d
+            Nome: %s
+            CPF: %s
+            Endereco: %s
+            Email(s): %s
+            Telefone(s): %s
+        """;
+
+        String mensagem = """
+        Abaixo estão listados todos os clientes cadastrados no sistema:
+        
+        %s
+        """;
+
+        String funcionarioMensagens = funcionarios
+                .stream()
+                .map(funcionario ->
+                        String.format(
+                                funcionarioMensagem,
+                                funcionario.getId(),
+                                funcionario.getNome(),
+                                funcionario.getCpf(),
+                                enderecoEspecificoConverter.converterEnderecoEspecificoParaString(funcionario.getEndereco()),
+                                emailConverter.converterEmailsParaString(funcionario.getEmails()),
+                                telefoneConverter.converterTelefonesParaString(funcionario.getTelefones())
+                        )
+                )
+                .collect(Collectors.joining("\n"));
+
+        return String.format(mensagem, funcionarioMensagens);
     }
 }

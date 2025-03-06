@@ -12,8 +12,8 @@ public class ServicoConverter {
         NumberFormat formatadorMoeda = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
 
         String mensagem = """
-        Tipo de serviço: %s
-        Valor cobrado: %s
+            Tipo de serviço: %s
+            Valor cobrado: %s
         """;
 
         return String.format(

@@ -1,7 +1,5 @@
 package br.unioeste.geral.ordemservico.chatbot.service;
 
-import br.unioeste.geral.endereco.bo.endereco.Endereco;
-import br.unioeste.geral.endereco.bo.enderecoespecifico.EnderecoEspecifico;
 import br.unioeste.geral.ordemservico.bo.cliente.Cliente;
 import br.unioeste.geral.ordemservico.bo.funcionario.Funcionario;
 import br.unioeste.geral.ordemservico.bo.ordemservico.OrdemServico;
@@ -30,6 +28,7 @@ public class UCChatbotServicos {
     private final String geminiApiKey;
 
     private final String instrucaoInicial;
+    private final String respostaPadrao;
 
     private final ObjectMapper objectMapper;
 
@@ -55,6 +54,10 @@ public class UCChatbotServicos {
         os dados de uma ordem de serviço, mostrar todas as ordens de serviço, mostrar os dados de um tipo de serviço, mostrar todos os tipos de serviço, mostrar
         os serviços realizados de um tipo de serviço, mostrar os dados de um cliente, mostrar todos os clientes, mostrar os dados de um funcionario, mostrar todos
         os funcionarios.
+        """;
+
+        respostaPadrao = """
+        Sinto muito, não entendi o que você deseja saber sobre o sistema de gerenciamento de ordens de serviço
         """;
 
         objectMapper = new ObjectMapper();
@@ -217,7 +220,7 @@ public class UCChatbotServicos {
             }
         }
 
-        return null;
+        return respostaPadrao;
     }
 
     private String lidarPartesResposta(JsonNode partesResposta) throws Exception {
@@ -232,7 +235,7 @@ public class UCChatbotServicos {
             }
         }
 
-        return null;
+        return respostaPadrao;
     }
 
     private String realizarChamadaServico(JsonNode noMetodoServico) throws Exception {
@@ -273,7 +276,7 @@ public class UCChatbotServicos {
             return obterOrdemServicos();
         }
 
-        return null;
+        return respostaPadrao;
     }
 
     private String obterClientePorID(JsonNode argumentos) throws Exception{

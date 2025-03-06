@@ -19,22 +19,15 @@ public class ClienteConverter {
 
     public String converterClienteParaString(Cliente cliente){
         String mensagem = """
-        ID: %d
-        Primeiro nome: %s
-        Nome do meio: %s
-        Sobrenome: %s
-        CPF: %s
-        Endereco: %s
-        Email(s): %s
-        Telefone(s): %s
+        O cliente solicitado é o(a) %s, portador(a) do CPF %s. O endereço cadastrado para ele(a) é %s.
+        
+        E-mail(s) para contato: %s
+        Telefone(s) para contato: %s
         """;
 
         return String.format(
                 mensagem,
-                cliente.getId(),
-                cliente.getPrimeiroNome(),
-                cliente.getNomeDoMeio(),
-                cliente.getUltimoNome(),
+                cliente.getNome(),
                 cliente.getCpf(),
                 enderecoEspecificoConverter.converterEnderecoEspecificoParaString(cliente.getEndereco()),
                 emailConverter.converterEmailsParaString(cliente.getEmails()),
@@ -43,6 +36,37 @@ public class ClienteConverter {
     }
 
     public String converterClientesParaString(List<Cliente> clientes){
-        return clientes.stream().map(this::converterClienteParaString).collect(Collectors.joining("\n"));
+        String clienteMensagem = """
+            ID: %d
+            Nome: %s
+            CPF: %s
+            Endereco: %s
+            Email(s): %s
+            Telefone(s): %s
+        """;
+
+        String mensagem = """
+        Abaixo estão listados todos os clientes cadastrados no sistema:
+        
+        %s
+        """;
+
+        String clientesMensagem = clientes
+                .stream()
+                .map(cliente ->
+                        String.format(
+                                clienteMensagem,
+                                cliente.getId(),
+                                cliente.getNome(),
+                                cliente.getCpf(),
+                                enderecoEspecificoConverter.converterEnderecoEspecificoParaString(cliente.getEndereco()),
+                                emailConverter.converterEmailsParaString(cliente.getEmails()),
+                                telefoneConverter.converterTelefonesParaString(cliente.getTelefones())
+                        )
+                )
+                .collect(Collectors.joining("\n"));
+
+        return String.format(mensagem, clientesMensagem);
     }
 }
+

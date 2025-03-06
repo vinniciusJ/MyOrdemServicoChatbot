@@ -8,24 +8,45 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class TipoServicoConverter {
-    public String converterTipoServicoParaString(TipoServico tipoServico) {
-        NumberFormat formatadorMoeda = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
+    private final NumberFormat formatadorMoeda;
 
-        String mensagem = """
-        ID: %d
-        Nome: %s
-        Valor de referência: %s
-        """;
+    public TipoServicoConverter() {
+        formatadorMoeda = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
+    }
+
+    public String converterTipoServicoParaString(TipoServico tipoServico) {
+        String mensagem = "O tipo de serviço solicitado é %s, com valor de referência de %s ";
 
         return String.format(
                 mensagem,
-                tipoServico.getId(),
                 tipoServico.getNome(),
                 formatadorMoeda.format(tipoServico.getValorReferencia())
         );
     }
 
     public String converterTipoServicosParaString(List<TipoServico> tipoServicos) {
-        return tipoServicos.stream().map(this::converterTipoServicoParaString).collect(Collectors.joining("\n"));
+        String tipoServicoMensagem = """
+            ID: %d
+            Nome: %s
+            Valor de referência: %s
+        """;
+
+        String mensagem = """
+        Abaixo estão listados todos os tipos de serviços cadastrados no sistema
+        
+        %s
+        """;
+
+        String tipoServicosMensagem = tipoServicos
+                .stream()
+                .map(tipoServico -> String.format(
+                        tipoServicoMensagem,
+                        tipoServico.getId(),
+                        tipoServico.getNome(),
+                        formatadorMoeda.format(tipoServico.getValorReferencia())
+                ))
+                .collect(Collectors.joining("\n"));
+
+        return String.format(mensagem, tipoServicosMensagem);
     }
 }
