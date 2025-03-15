@@ -1,17 +1,7 @@
 package br.unioeste.geral.ordemservico.chatbot.service;
 
-import br.unioeste.geral.ordemservico.bo.cliente.Cliente;
-import br.unioeste.geral.ordemservico.bo.funcionario.Funcionario;
-import br.unioeste.geral.ordemservico.bo.ordemservico.OrdemServico;
-import br.unioeste.geral.ordemservico.bo.tiposervico.TipoServico;
-import br.unioeste.geral.ordemservico.chatbot.converter.ClienteConverter;
-import br.unioeste.geral.ordemservico.chatbot.converter.FuncionarioConverter;
-import br.unioeste.geral.ordemservico.chatbot.converter.OrdemServicoConverter;
-import br.unioeste.geral.ordemservico.chatbot.converter.TipoServicoConverter;
-import br.unioeste.geral.ordemservico.servico.service.cliente.UCClienteServicos;
-import br.unioeste.geral.ordemservico.servico.service.funcionario.UCFuncionarioServicos;
-import br.unioeste.geral.ordemservico.servico.service.ordemservico.UCOrdemServicoServicos;
-import br.unioeste.geral.ordemservico.servico.service.tiposervico.UCTipoServicoServicos;
+import br.unioeste.geral.ordemservico.chatbot.dto.Intencao;
+import br.unioeste.geral.ordemservico.chatbot.dto.RespostaIA;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,20 +18,9 @@ public class UCChatbotServicos {
     private final String geminiApiKey;
 
     private final String instrucaoInicial;
-    private final String respostaPadrao;
+    private final RespostaIA<Void> respostaPadrao;
 
     private final ObjectMapper objectMapper;
-
-    private final UCClienteServicos clienteServicos;
-    private final UCFuncionarioServicos funcionarioServicos;
-
-    private final UCTipoServicoServicos tipoServicoServicos;
-    private final UCOrdemServicoServicos ordemServicoServicos;
-
-    private final ClienteConverter clienteConverter;
-    private final FuncionarioConverter funcionarioConverter;
-    private final TipoServicoConverter tipoServicoConverter;
-    private final OrdemServicoConverter ordemServicoConverter;
 
     public UCChatbotServicos() {
         geminiApiUrl = System.getenv("GEMINI_API_URL");
@@ -56,24 +35,16 @@ public class UCChatbotServicos {
         os funcionarios.
         """;
 
-        respostaPadrao = """
-        Sinto muito, não entendi o que você deseja saber sobre o sistema de gerenciamento de ordens de serviço
-        """;
+        respostaPadrao = new RespostaIA<>(
+                null,
+                null,
+                "Sinto muito, não entendi o que você deseja saber sobre o sistema de gerenciamento de ordens de serviço"
+        );
 
         objectMapper = new ObjectMapper();
-
-        clienteServicos = new UCClienteServicos();
-        funcionarioServicos = new UCFuncionarioServicos();
-        tipoServicoServicos = new UCTipoServicoServicos();
-        ordemServicoServicos = new UCOrdemServicoServicos();
-
-        clienteConverter = new ClienteConverter();
-        funcionarioConverter = new FuncionarioConverter();
-        tipoServicoConverter = new TipoServicoConverter();
-        ordemServicoConverter = new OrdemServicoConverter();
     }
 
-    public String enviarMensagem(String mensagem) throws Exception {
+    public RespostaIA<?> obterResposta(String mensagem) throws Exception {
         return processarRespostaIA(enviarRequisicao(mensagem));
     }
 
@@ -98,7 +69,7 @@ public class UCChatbotServicos {
 
     private Map<String, Object> criarConteudoRequisicao(String messagem){
         Map<String, Object> obterClientePorID = Map.of(
-                "name", "obterClientePorID",
+                "name", Intencao.OBTER_CLIENTE_POR_ID,
                 "description", "Retorna todas as informações de um cliente baseado (id/número/código) fornecido. Sempre que o usuário falar de um cliente e passar um número (identificador), essa função deve ser chamada.",
                 "parameters", Map.of(
                         "type", "object",
@@ -113,7 +84,7 @@ public class UCChatbotServicos {
         );
 
         Map<String, Object> obterFuncionarioPorID = Map.of(
-                "name", "obterFuncionarioPorID",
+                "name", Intencao.OBTER_FUNCIONARIO_POR_ID,
                 "description", "Retorna todas as informações de um funcionário baseado (id/número/código) fornecido. Sempre que o usuário falar de um funcionário e passar um número (identificador), essa função deve ser chamada.",
                 "parameters", Map.of(
                         "type", "object",
@@ -128,7 +99,7 @@ public class UCChatbotServicos {
         );
 
         Map<String, Object> obterTipoServicoPorID = Map.of(
-                "name", "obterTipoServicoPorID",
+                "name", Intencao.OBTER_TIPO_SERVICO_POR_ID,
                 "description", "Retorna todas as informações de um tipo de serviço baseado (id/número/código) fornecido. Sempre que o usuário falar de um tipo de serviço e passar um número (identificador), essa função deve ser chamada.",
                 "parameters", Map.of(
                         "type", "object",
@@ -143,7 +114,7 @@ public class UCChatbotServicos {
         );
 
         Map<String, Object> obterOrdemServicoPorNumero = Map.of(
-                "name", "obterOrdemServicoPorNumero",
+                "name", Intencao.OBTER_ORDEM_SERVICO_POR_NUMERO,
                 "description", "Retorna todas as informações de um ordem de serviço baseado (id/número/código) fornecido. Sempre que o usuário falar de uma ordem de serviço e passar um número (identificador), essa função deve ser chamada.",
                 "parameters", Map.of(
                         "type", "object",
@@ -158,22 +129,22 @@ public class UCChatbotServicos {
         );
 
         Map<String, Object> obterClientes = Map.of(
-                "name", "obterClientes",
+                "name", Intencao.OBTER_CLIENTES,
                 "description", "Retorna todos os clientes cadastrados no sistema, mostrando um resumo das informações de cada um"
         );
 
         Map<String, Object> obterFuncionarios = Map.of(
-                "name", "obterFuncionarios",
+                "name", Intencao.OBTER_FUNCIONARIOS,
                 "description", "Retorna todos os funcionários cadastrados no sistema, mostrando um resumo das informações de cada um"
         );
 
         Map<String, Object> obterTipoServicos = Map.of(
-                "name", "obterTipoServicos",
+                "name", Intencao.OBTER_TIPOS_SERVICO,
                 "description", "Retorna todos os tipos de serviços cadastrados no sistema, mostrando um resumo das informações de cada um"
         );
 
         Map<String, Object> obterOrdensServicos = Map.of(
-                "name", "obterOrdemServicos",
+                "name", Intencao.OBTER_ORDEM_SERVICOS,
                 "description", "Retorna todos as ordens de serviços cadastrados no sistema, mostrando um resumo das informações de cada um"
         );
 
@@ -201,17 +172,17 @@ public class UCChatbotServicos {
         );
     }
 
-    private String processarRespostaIA(String resposta) throws Exception {
+    private RespostaIA<?> processarRespostaIA(String resposta) throws Exception {
         JsonNode noRaiz = objectMapper.readTree(resposta);
 
         if (noRaiz.has("candidates")) {
             return lidarRespostasCandidatas(noRaiz.path("candidates"));
         }
 
-        return resposta;
+        return new RespostaIA<>(null, null, resposta);
     }
 
-    private String lidarRespostasCandidatas(JsonNode nosCandidatos) throws Exception{
+    private RespostaIA<?> lidarRespostasCandidatas(JsonNode nosCandidatos) throws Exception{
         if(nosCandidatos.isArray() && !nosCandidatos.isEmpty()){
             JsonNode noConteudo = nosCandidatos.get(0).path("content");
 
@@ -223,7 +194,7 @@ public class UCChatbotServicos {
         return respostaPadrao;
     }
 
-    private String lidarPartesResposta(JsonNode partesResposta) throws Exception {
+    private RespostaIA<?> lidarPartesResposta(JsonNode partesResposta) throws Exception {
         if(!partesResposta.isEmpty()){
             JsonNode primeiraParte = partesResposta.get(0);
 
@@ -231,103 +202,91 @@ public class UCChatbotServicos {
                 JsonNode functionCallNode = primeiraParte.path("functionCall");
                 return realizarChamadaServico(functionCallNode);
             } else if (primeiraParte.has("text")) {
-                return primeiraParte.path("text").asText();
+                String resposta = primeiraParte.path("text").asText();
+
+                return new RespostaIA<>(null, null, resposta);
             }
         }
 
         return respostaPadrao;
     }
 
-    private String realizarChamadaServico(JsonNode noMetodoServico) throws Exception {
-        String nomeMetodo = noMetodoServico.path("name").asText();
+    private RespostaIA<?> realizarChamadaServico(JsonNode noMetodoServico) throws Exception {
+        String servico = noMetodoServico.path("name").asText();
         JsonNode argumentos = noMetodoServico.path("args");
 
-        System.out.println(nomeMetodo);
-
-        if(nomeMetodo.equals("obterClientePorID")){
-            return obterClientePorID(argumentos);
+        if(servico.equals(Intencao.OBTER_CLIENTE_POR_ID.toString())){
+            return criarRespostaParaIntencaoObterClientePorID(argumentos);
         }
 
-        if(nomeMetodo.equals("obterFuncionarioPorID")){
-            return obterFuncionarioPorID(argumentos);
+        if(servico.equals(Intencao.OBTER_FUNCIONARIO_POR_ID.toString())){
+            return criarRespostaParaIntencaoObterFuncionarioPorID(argumentos);
         }
 
-        if(nomeMetodo.equals("obterTipoServicoPorID")){
-            return obterTipoServicoPorID(argumentos);
+        if(servico.equals(Intencao.OBTER_TIPO_SERVICO_POR_ID.toString())){
+            return criarRespostaParaIntencaoObterTipoServicoPorID(argumentos);
         }
 
-        if(nomeMetodo.equals("obterOrdemServicoPorNumero")){
-            return obterOrdemServicoPorNumero(argumentos);
+        if(servico.equals(Intencao.OBTER_ORDEM_SERVICO_POR_NUMERO.toString())){
+            return criarRespostaParaIntencaoObterOrdemServicoPorNumero(argumentos);
         }
 
-        if(nomeMetodo.equals("obterClientes")){
-            return obterClientes();
+        if(servico.equals(Intencao.OBTER_CLIENTES.toString())){
+            return criarRespostaParaIntencaoObterClientes();
         }
 
-        if(nomeMetodo.equals("obterFuncionarios")){
-            return obterFuncionarios();
+        if(servico.equals(Intencao.OBTER_FUNCIONARIOS.toString())){
+            return criarRespostaParaIntencaoObterFuncionarios();
         }
 
-        if(nomeMetodo.equals("obterTipoServicos")){
-            return obterTipoServicos();
+        if(servico.equals(Intencao.OBTER_TIPOS_SERVICO.toString())){
+            return criarRespostaParaIntencaoObterTiposServicos();
         }
 
-        if(nomeMetodo.equals("obterOrdemServicos")){
-            return obterOrdemServicos();
+        if(servico.equals(Intencao.OBTER_ORDEM_SERVICOS.toString())){
+            return criarRespostaParaIntencaoObterOrdemServicos();
         }
 
         return respostaPadrao;
     }
 
-    private String obterClientePorID(JsonNode argumentos) throws Exception{
+    private RespostaIA<Void> criarRespostaParaIntencaoObterClientes(){
+        return new RespostaIA<>(Intencao.OBTER_CLIENTES, null, null);
+    }
+
+    private RespostaIA<Void> criarRespostaParaIntencaoObterFuncionarios(){
+        return new RespostaIA<>(Intencao.OBTER_FUNCIONARIOS, null, null);
+    }
+
+    private RespostaIA<Void> criarRespostaParaIntencaoObterTiposServicos(){
+        return new RespostaIA<>(Intencao.OBTER_TIPOS_SERVICO, null, null);
+    }
+
+    private RespostaIA<Void> criarRespostaParaIntencaoObterOrdemServicos(){
+        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, null, null);
+    }
+
+    private RespostaIA<Long> criarRespostaParaIntencaoObterClientePorID(JsonNode argumentos){
         long idCliente = argumentos.path("idCliente").asLong();
-        Cliente cliente = clienteServicos.obterClientePorID(idCliente);
 
-        return clienteConverter.converterClienteParaString(cliente);
+        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, idCliente, null);
     }
 
-    private String obterFuncionarioPorID(JsonNode argumentos) throws Exception{
+    private RespostaIA<Long> criarRespostaParaIntencaoObterFuncionarioPorID(JsonNode argumentos){
         long idFuncionario = argumentos.path("idFuncionario").asLong();
-        Funcionario funcionario = funcionarioServicos.obterFuncionarioPorID(idFuncionario);
 
-        return funcionarioConverter.converterFuncionarioParaString(funcionario);
+        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, idFuncionario, null);
     }
 
-    private String obterTipoServicoPorID(JsonNode argumentos) throws Exception {
+    private RespostaIA<Long> criarRespostaParaIntencaoObterTipoServicoPorID(JsonNode argumentos){
         long idTipoServico = argumentos.path("idTipoServico").asLong();
-        TipoServico tipoServico = tipoServicoServicos.obterTipoServicoPorID(idTipoServico);
 
-        return tipoServicoConverter.converterTipoServicoParaString(tipoServico);
+        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, idTipoServico, null);
     }
 
-    private String obterOrdemServicoPorNumero(JsonNode argumentos) throws Exception {
+    private RespostaIA<String> criarRespostaParaIntencaoObterOrdemServicoPorNumero(JsonNode argumentos){
         String numeroOrdemServico = argumentos.path("numeroOrdemServico").asText();
-        OrdemServico ordemServico = ordemServicoServicos.obterOrdemServicoPorNumero(numeroOrdemServico);
 
-        return ordemServicoConverter.converterOrdemServicoParaString(ordemServico);
-    }
-
-    private String obterClientes() throws Exception {
-        List<Cliente> clientes = clienteServicos.obterClientes();
-
-        return clienteConverter.converterClientesParaString(clientes);
-    }
-
-    private String obterFuncionarios() throws Exception {
-        List<Funcionario> funcionarios = funcionarioServicos.obterFuncionarios();
-
-        return funcionarioConverter.converterFuncionariosParaString(funcionarios);
-    }
-
-    private String obterTipoServicos() throws Exception {
-        List<TipoServico> tipoServicos = tipoServicoServicos.obterTiposServicos();
-
-        return tipoServicoConverter.converterTipoServicosParaString(tipoServicos);
-    }
-
-    private String obterOrdemServicos() throws Exception {
-        List<OrdemServico> ordemServicos = ordemServicoServicos.obterOrdemServicos();
-
-        return ordemServicoConverter.converterOrdemServicosParaString(ordemServicos);
+        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, numeroOrdemServico, null);
     }
 }
