@@ -139,7 +139,7 @@ public class UCChatbotServicos {
         );
 
         Map<String, Object> obterTipoServicos = Map.of(
-                "name", Intencao.OBTER_TIPOS_SERVICO,
+                "name", Intencao.OBTER_TIPOS_SERVICOS,
                 "description", "Retorna todos os tipos de serviços cadastrados no sistema, mostrando um resumo das informações de cada um"
         );
 
@@ -239,7 +239,7 @@ public class UCChatbotServicos {
             return criarRespostaParaIntencaoObterFuncionarios();
         }
 
-        if(servico.equals(Intencao.OBTER_TIPOS_SERVICO.toString())){
+        if(servico.equals(Intencao.OBTER_TIPOS_SERVICOS.toString())){
             return criarRespostaParaIntencaoObterTiposServicos();
         }
 
@@ -259,7 +259,7 @@ public class UCChatbotServicos {
     }
 
     private RespostaIA<Void> criarRespostaParaIntencaoObterTiposServicos(){
-        return new RespostaIA<>(Intencao.OBTER_TIPOS_SERVICO, null, null);
+        return new RespostaIA<>(Intencao.OBTER_TIPOS_SERVICOS, null, null);
     }
 
     private RespostaIA<Void> criarRespostaParaIntencaoObterOrdemServicos(){
@@ -269,24 +269,24 @@ public class UCChatbotServicos {
     private RespostaIA<Long> criarRespostaParaIntencaoObterClientePorID(JsonNode argumentos){
         long idCliente = argumentos.path("idCliente").asLong();
 
-        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, idCliente, null);
+        return new RespostaIA<>(Intencao.OBTER_CLIENTE_POR_ID, idCliente, null);
     }
 
     private RespostaIA<Long> criarRespostaParaIntencaoObterFuncionarioPorID(JsonNode argumentos){
         long idFuncionario = argumentos.path("idFuncionario").asLong();
 
-        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, idFuncionario, null);
+        return new RespostaIA<>(Intencao.OBTER_FUNCIONARIO_POR_ID, idFuncionario, null);
     }
 
     private RespostaIA<Long> criarRespostaParaIntencaoObterTipoServicoPorID(JsonNode argumentos){
         long idTipoServico = argumentos.path("idTipoServico").asLong();
 
-        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, idTipoServico, null);
+        return new RespostaIA<>(Intencao.OBTER_TIPO_SERVICO_POR_ID, idTipoServico, null);
     }
 
     private RespostaIA<String> criarRespostaParaIntencaoObterOrdemServicoPorNumero(JsonNode argumentos){
         String numeroOrdemServico = argumentos.path("numeroOrdemServico").asText();
 
-        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICOS, numeroOrdemServico, null);
+        return new RespostaIA<>(Intencao.OBTER_ORDEM_SERVICO_POR_NUMERO, numeroOrdemServico, null);
     }
 }
